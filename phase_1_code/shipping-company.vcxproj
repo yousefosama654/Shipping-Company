@@ -29,13 +29,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -48,7 +48,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -139,22 +139,46 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cargos.cpp" />
+    <ClCompile Include="cancellationEvent.cpp" />
+    <ClCompile Include="cargo.cpp" />
+    <ClCompile Include="Company.cpp" />
+    <ClCompile Include="event.cpp" />
+    <ClCompile Include="NormalCargo.cpp" />
+    <ClCompile Include="promotionEvent.cpp" />
+    <ClCompile Include="PreparationEvent.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="specialTruck.cpp" />
-    <ClCompile Include="special_cargos.cpp" />
+    <ClCompile Include="SpecialCargo.cpp" />
     <ClCompile Include="time.cpp" />
     <ClCompile Include="truck.cpp" />
+    <ClCompile Include="UI.cpp" />
     <ClCompile Include="vipCargo.cpp" />
+    <ClCompile Include="viptruck.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cancellationEvent.h" />
     <ClInclude Include="cargo.h" />
-    <ClInclude Include="status.h" />
+    <ClInclude Include="event.h" />
+    <ClInclude Include="Company.h" />
+    <ClInclude Include="files.h" />
+    <ClInclude Include="LinkedList.h" />
+    <ClInclude Include="ListADT.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="NormalCargo.h" />
+    <ClInclude Include="PriNode.h" />
+    <ClInclude Include="PriQ.h" />
+    <ClInclude Include="queue.h" />
+    <ClInclude Include="promotionEvent.h" />
+    <ClInclude Include="PreparationEvent.h" />
+    <ClInclude Include="info.h" />
     <ClInclude Include="specialTruck.h" />
-    <ClInclude Include="special_cargos.h" />
+    <ClInclude Include="SpecialCargo.h" />
+    <ClInclude Include="Status.h" />
     <ClInclude Include="time.h" />
     <ClInclude Include="truck.h" />
+    <ClInclude Include="UI.h" />
     <ClInclude Include="vipCargo.h" />
+    <ClInclude Include="viptruck.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
