@@ -14,15 +14,14 @@
 #include <math.h>
 #include"queue.h"
 using namespace std;
-class UI; 
+class UI;
 class Company
-{   
+{
 	// UI parameters 
 	string inputFileName;
 	string outputFileName;
 	ifstream inputFile;
 	ofstream outputFile;
-	/* Ui HAS a func receives event  and we call it from the ready event */
 	// number of trucks
 	int noOfNT;
 	int noOfST;
@@ -50,55 +49,76 @@ class Company
 	int maxWaiting;
 	// no of events
 	int numberOfEvents;
-	
-	int maxTrucksCount; 
+
+	int TrucksCount;
+	int maxTrucksCount;
 	int promotedCount;
 	int CargosCount;
 
-	int NCargosCount; 
-	int SCargosCount; 
-	int VCargosCount; 
+	int NCargosCount;
+	int SCargosCount;
+	int VCargosCount;
+
+	int NTrucksCount;
+	int STrucksCount;
+	int VTrucksCount;
+
+	int noNightNormalTrucks;
+	int noNightSpecialTrucks;
+	int noNightVipTrucks;
 
 
 
 	int noWaitingCargos;
-	int noMovingCargos; 
+	int noMovingCargos;
 	int noDeliveredCargos;
 	// used in cargo promotion 
 	int AutoPromotion;
 	int noPromotedCargos;
-	// TODO take care with this counter in tour functions
+
+	bool isNormalTruckLoading;
+	bool isSpecialTruckLoading;
+	bool isVipTruckLoading;
 	// program mode (interactive | silent | step by step)
-	char mode; 
-	
-	
+	char mode;
+
+
 	//Events
 	Queue<event*>Events;
-	
+
 	// cargos type
-	LinkedList<NormalCargo*> NormalCargos;
-	PriQ<vipCargo*> vipcargos;
-	Queue<SpecialCargo*> SpecialCargos;
-	
-	Queue<NormalCargo*> NormalWaitingCargos; 
-	Queue<SpecialCargo*> SpecialWaitingCargos; 
+	Queue<NormalCargo*> NormalWaitingCargos;
+	Queue<SpecialCargo*> SpecialWaitingCargos;
 	PriQ<vipCargo*> VipWaitingCargos;
-	
+
 	PriQ<cargo*> LoadingCargos;
 	PriQ<cargo*> MovingCargos;
 	Queue<cargo*> DeliveredCargos;
-	
-	Queue<truck*> NormalTrucks;
-	Queue<truck*> VipTrucks;
-	Queue<truck*> SpecialTrucks;
-	
+
+	PriQ<truck*> NormalTrucks;
+	PriQ<truck*> VipTrucks;
+	PriQ<truck*> SpecialTrucks;
+
+	PriQ<truck*> NightNormalTrucks;
+	PriQ<truck*> NightSpecialTrucks;
+	PriQ<truck*> NightVipTrucks;
+
+	Queue<int> speed; // speed for each truck (bonus)
+	Queue<int> capacity; // capacity for each truck (bonus)
+
+
 	PriQ<truck*> LoadingTrucks;
 	PriQ<truck*> MovingTrucks;
 	PriQ<truck*> CheckupTrucks;
-	
+
+	// Bonus
+	Queue<truck*> MaintanceForSomeReasons_Normal;
+	Queue<truck*> MaintanceForSomeReasons_Special;
+	Queue<truck*> MaintanceForSomeReasons_Vip;
+
 	//UI 
 	UI* ui;
-	
+
 	//Current Day
 	Time currentTime;
 
@@ -106,107 +126,294 @@ class Company
 	int getMaxNormalLoadingTime(int);
 	int getMaxSpecialLoadingTime(int);
 	int getMaxVipLoadingTime(int);
-public:
-	Company(string OFN, string IFN);
 	void ReadInput(); // reads input from file 
-	void InitialiseTrucks();
+	void initTrucks();
 
 
 	// Current hour
-	void IncrementCurrentHour(); // includes the logic for phase 1 
-	int getCurrentHour(); 
-	void IncrementCurrentDay(); 
-	int getCurrentday(); 
-	bool isWorkingTime(); 
+	int getCurrentHour();
+	void IncrementCurrentDay();
+	int getCurrentday();
+	bool isWorkingTime();
 	bool isWorkingTime(Time);
 
 	// Add TO
-	// Cargos 
-	void AddToNormalCargos(NormalCargo*); 
-	void AddToVIPCargos(vipCargo*, float); 
-	void AddToSpeacialCargos(SpecialCargo*); 
-	
-	// Types 
-	void AddToWaitingCargos(cargo* c); 
-	void AddToLoadingCargos(cargo* c); 
-	void AddToMovingCargos(cargo* c);
-	void AddToDeliveredCargos(cargo* c);
-	
+
 	// Trucks 
 	void AddToLoadingTrucks(truck* t, int n);
-	void AddToNormalTrucks(truck* NT, float speed); 
-	void AddToSpecialTrucks(truck* ST, float speed); 
-	void AddToVipTrucks(truck* VT, float speed); 
-	
 	void AddToMovingTrucks(truck* t, int n);
 	void AddToTrucksCheckup(truck* t, int n);
-	
-	// for simulation 
-	bool check(); 
-	void setMode(); 
 
-	// Remove from Lists
-	NormalCargo* RemoveFromNormalCargos( int pos=1 );
-	SpecialCargo* RemoveFromSpecialCargos(); 
-	vipCargo* RemoveFromvipCargos();
 
-	truck* RemoveFromVipTrucks(); 
-	truck* RemoveFromSpecialTrucks(); 
-	truck* RemoveFromNormalTrucks(); 
-	
-	NormalCargo* RemoveFromWaitingCargos(int);
-	cargo* RemoveFromLoadingCargos(); 
-	cargo* RemoveFromMovingCargos(); 
-	cargo* RemoveFromDeliveredCargos(); 
-	
-	truck* RemoveFromLoadingTrucks(); 
-	truck* RemoveFromMovingTrucks(); 
-	truck* RemoveFromTrucksCheckup(); 
+
+	cargo* RemoveFromLoadingCargos();
+	cargo* RemoveFromMovingCargos();
+	cargo* RemoveFromDeliveredCargos();
+
+	truck* RemoveFromLoadingTrucks();
+	truck* RemoveFromMovingTrucks();
+	truck* RemoveFromTrucksCheckup();
 	//
 	void checkMovingCargos();
 	//Check if waiting cargos are all empty or not
-	bool CheckWaitingCargos(); //
 
 	//Execute Events
 	void ExecuteEvent(); //
 
 	// Assignment for phase 2 
-	void AssignNormalCargo(); 
-	void AssignSpecialCargo(); 
-	void AssignVipCargo(); 
+	void AssignNormalCargo();
+	void AssignSpecialCargo();
+	void AssignVipCargo();
 
-	bool CheckAvailabletruck(truck*& t, char Type); 
-	void AssignTruckToCargo(truck*t, cargo* c); // see the result in above functions
-												
-	// Promote NormalCargo
-	void PromoteCargo(int CargoID); 
-	
+	bool CheckAvailabletruck(truck*& t, char Type);
+	void AssignTruckToCargo(truck* t, cargo* c); 
+
+
 	//Move Trucks 
-	void MoveTruckFromEmptyToLoading(truck*);
-	void MoveTruckFromLoadingToMoving();                     // the priority here is prop to what
+	void MoveTruckFromLoadingToMoving();
 	void MoveTruckFromMovingToCheckupOrWaiting();
-	void MoveRoverFromCheckupToEmpty();
-	
+	void MoveTruckFromMovingTonReguarMaintance();
+	void MoveTruckFromCheckupToEmpty();
+	void MoveTruckFromUnReguarMaintanceToEmpty();
 	// MaxW Assignment
 	void AssignNormalCargo_MaxW();
 	void AssignSpecialCargo_MaxW();
-	
+	void AssignVipCargo_MaxW();
 	// AutP 
 	void AutoPromotinFunc();
 	// check the implementation
 	//Output file associated functions
-	void PrintOutput(); 
-	
-	void getStatistics(); 
-	void printTrucksData(); 
-	void printCargosData(); 
+
+	void getStatistics();
+	void printTrucksData();
+	void printCargosData();
+
+	template <class T>
+	void LoadCargosToTruck(PriQ<truck*>& qTruck, Queue<T*>& cList, bool& systemNeed, bool& , int Mainta = 0);
+	template <class T>
+	void LoadCargosToTruck(Queue<truck*>& qTruck, Queue<T*>& cList, bool& systemNeed, bool& , int Mainta = 0);
+
+	void LoadCargosToTruck(PriQ<truck*>& qTruck, PriQ<vipCargo*>& cList, bool& systemNeed, bool& , int Mainta = 0);
+
+	void LoadCargosToTruck(Queue<truck*>& qTruck, PriQ<vipCargo*>& cList, bool& systemNeed, bool& , int Mainta = 0);
+
+	template<class T>
+	void LoadCargosToTruck_MaxW(PriQ<truck*>& qTruck, Queue<T*>& cList, bool& systemNeed, bool& isLoading, int Mainta = 0);
+	template<class T>
+	void LoadCargosToTruck_MaxW(Queue<truck*>& qTruck, Queue<T*>& cList, bool& systemNeed, bool& isLoading, int Mainta = 0);
+
+	void LoadCargosToTruck_MaxW(PriQ<truck*>& qTruck, PriQ<vipCargo*>& cList, bool& systemNeed, bool& isLoading, int Mainta = 0);
+
+	void LoadCargosToTruck_MaxW(Queue<truck*>& qTruck, PriQ<vipCargo*>& cList, bool& systemNeed, bool& isLoading, int Mainta = 0);
 
 	//Print from UI
-	void print(); 
 
 	//get auto promotion
-	int GetAutoPromotionLimit(); 
-	
-	~Company(); 
-	//edits for maxw
+	int GetAutoPromotionLimit();
+
+	bool isOpen();
+	void closeCompany();
+
+	void destroyTrucks();
+public:
+	Company(string OFN, string IFN);
+	void print();
+	NormalCargo* RemoveFromWaitingCargos(int);
+	void IncrementCurrentHour(); // includes the logic for phase 1 
+	void setMode();
+	// for simulation 
+	bool check();
+	// Promote NormalCargo
+	void AddToWaitingCargos(cargo* c);
+	void PromoteCargo(int CargoID);
+	void PrintOutput();
+	~Company();
 };
+
+template<class T>
+inline void Company::LoadCargosToTruck(PriQ<truck*>& qTruck, Queue<T*>& cList, bool& systemNeed, bool& isLoading, int Mainta)
+{
+
+	truck* t = nullptr;
+	T* nc;
+	cList.peek(nc);
+	if (cList.isEmpty())
+		return;
+
+	if (!qTruck.isEmpty())
+	{
+		qTruck.peek(t);
+
+		if (t->getCapcity() <= cList.getCount() && !isLoading)
+		{
+			NormalCargo* Mnc = dynamic_cast<NormalCargo*> (nc);
+			SpecialCargo* Msc = dynamic_cast<SpecialCargo*> (nc);
+
+			int max;
+
+			if (Mnc)
+				max = getMaxNormalLoadingTime(t->getCapcity());
+			else if (Msc)
+				max = getMaxSpecialLoadingTime(t->getCapcity());
+
+			if (isWorkingTime(currentTime + max) || t->getNight())
+			{
+				t->setMovingTime(currentTime + max);
+				for (int i = 0; i < t->getCapcity(); i++)
+				{
+					cList.dequeue(nc);
+					noWaitingCargos--;
+					t->assignCargo(nc);
+				}
+				isLoading = 1;
+				t->incrementSumOfLoading(max);
+				qTruck.dequeue(t);
+
+				if (Mainta != 0)
+					t->setSpeed(t->getSpeed() / 2);
+
+				LoadingTrucks.enqueue(t, -(currentTime + max).toInt());
+				systemNeed = false;
+			}
+		}
+	}
+
+}
+
+template<class T>
+inline void Company::LoadCargosToTruck(Queue<truck*>& qTruck, Queue<T*>& cList, bool& systemNeed, bool& isLoading, int Mainta)
+{
+	truck* t = nullptr;
+	T* nc;
+	cList.peek(nc);
+	if (cList.isEmpty())
+		return;
+
+	if (!qTruck.isEmpty())
+	{
+		qTruck.peek(t);
+
+		if (t->getCapcity() <= cList.getCount() && !isLoading)
+		{
+			NormalCargo* Mnc = dynamic_cast<NormalCargo*> (nc);
+			SpecialCargo* Msc = dynamic_cast<SpecialCargo*> (nc);
+
+			int max;
+
+			if (Mnc)
+				max = getMaxNormalLoadingTime(t->getCapcity());
+			else if (Msc)
+				max = getMaxSpecialLoadingTime(t->getCapcity());
+
+			if (isWorkingTime(currentTime + max) || t->getNight())
+			{
+				t->setMovingTime(currentTime + max);
+				for (int i = 0; i < t->getCapcity(); i++)
+				{
+					cList.dequeue(nc);
+					noWaitingCargos--;
+					t->assignCargo(nc);
+				}
+				isLoading = 1;
+				t->incrementSumOfLoading(max);
+				qTruck.dequeue(t);
+
+				if (Mainta != 0)
+					t->setSpeed(t->getSpeed() / 2);
+
+				LoadingTrucks.enqueue(t, -(currentTime + max).toInt());
+				systemNeed = false;
+			}
+		}
+	}
+}
+
+template<class T>
+inline void Company::LoadCargosToTruck_MaxW(PriQ<truck*>& qTruck, Queue<T*>& cList, bool& systemNeed, bool& isLoading, int Mainta)
+{
+	T* nc;
+	cList.peek(nc);
+	truck* t;
+	if (cList.isEmpty())
+		return;
+
+	if (!qTruck.isEmpty())
+	{
+		qTruck.peek(t);
+		if (currentTime.toInt() >= (nc->getPreTime() + maxWaiting).toInt())
+		{
+			NormalCargo* Mnc = dynamic_cast<NormalCargo*> (nc);
+			SpecialCargo* Msc = dynamic_cast<SpecialCargo*> (nc);
+
+			int max;
+
+			if (Mnc)
+				max = getMaxNormalLoadingTime(cList.getCount());
+			else if (Msc)
+				max = getMaxSpecialLoadingTime(cList.getCount());
+
+			if (isWorkingTime(currentTime + max))
+			{
+				//  while !cList.isEmpty() && t->getCapcity() < i
+				for (int i = 0; i < t->getCapcity() && !cList.isEmpty(); i++)
+				{
+					t->setMovingTime(currentTime + max);
+					cList.dequeue(nc);
+					noWaitingCargos--;
+					t->assignCargo(nc);
+				}
+				isLoading = 1;
+				qTruck.dequeue(t);
+				if (Mainta != 0)
+					t->setSpeed(t->getSpeed() / 2);
+				LoadingTrucks.enqueue(t, -(currentTime + max).toInt());
+				systemNeed = false;
+			}
+		}
+	}
+}
+
+template<class T>
+inline void Company::LoadCargosToTruck_MaxW(Queue<truck*>& qTruck, Queue<T*>& cList, bool& systemNeed, bool& isLoading, int Mainta)
+{
+	T* nc;
+	cList.peek(nc);
+	truck* t;
+	if (cList.isEmpty())
+		return;
+
+	if (!qTruck.isEmpty())
+	{
+		qTruck.peek(t);
+		if (currentTime.toInt() >= (nc->getPreTime() + maxWaiting).toInt())
+		{
+			NormalCargo* Mnc = dynamic_cast<NormalCargo*> (nc);
+			SpecialCargo* Msc = dynamic_cast<SpecialCargo*> (nc);
+
+			int max;
+
+			if (Mnc)
+				max = getMaxNormalLoadingTime(cList.getCount());
+			else if (Msc)
+				max = getMaxSpecialLoadingTime(cList.getCount());
+
+			if (isWorkingTime(currentTime + max))
+			{
+				//  while !cList.isEmpty() && t->getCapcity() < i
+				for (int i = 0; i < t->getCapcity() && !cList.isEmpty(); i++)
+				{
+					t->setMovingTime(currentTime + max);
+					cList.dequeue(nc);
+					noWaitingCargos--;
+					t->assignCargo(nc);
+				}
+				isLoading = 1;
+				qTruck.dequeue(t);
+				if (Mainta != 0)
+					t->setSpeed(t->getSpeed() / 2);
+				LoadingTrucks.enqueue(t, -(currentTime + max).toInt());
+				systemNeed = false;
+			}
+		}
+	}
+}

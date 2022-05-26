@@ -59,7 +59,7 @@ public:
 	void setassociated(truck* p);
 	void setAutoP(); //Set AtuoP to 1
 	void setMovingTime(Time);
-	void setCDT(Time);
 	void calCDT();
+	void calWaitingTime(); 
 	virtual ~cargo(); 
 };

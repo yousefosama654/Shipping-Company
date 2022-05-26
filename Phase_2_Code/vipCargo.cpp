@@ -4,6 +4,7 @@ vipCargo::vipCargo()
 }
 float vipCargo::getpriority()
 {
+	setpriority();
 	return priority;
 }
 vipCargo::~vipCargo()
@@ -20,9 +21,9 @@ vipCargo::vipCargo(NormalCargo* N) : cargo(N->getId(), N->getPreTime(), N->getLo
 void vipCargo::setpriority()
 {
 	// what is the real equation ??
-	//priority = float(cost) / (dd);
+	//priority = float(..cost) / (dd);
 
-	priority = cost / (deliveryDistance * PT.toInt()); 
+	priority = (cost / (deliveryDistance * PT.toInt())) * 100; 
 	// what if days can be concluded
 	// (preparation day -current day)*24 + prapartion hour - current hour;
 	/// another reason is the simulation

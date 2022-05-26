@@ -57,7 +57,10 @@ public:
 			return true;
 		return false;
 	}
-
+	Node<T>* getHead()
+	{
+		return Head;
+	}
 	bool insert(int newPosition, const T& newEntry)
 	{
 		bool ableToInsert = (newPosition >= 1) && (newPosition <= itemCount + 1);
@@ -107,8 +110,12 @@ public:
 
 	void clear()
 	{
-		while (!isEmpty())
-			remove(1);
+		while (Head)
+		{
+			Node<T>* x = Head; 
+			Head = Head->getNext();
+			delete x; 
+		}
 	}
 
 	~LinkedList()

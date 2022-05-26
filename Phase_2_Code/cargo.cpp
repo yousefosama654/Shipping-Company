@@ -81,17 +81,17 @@ void cargo::setMovingTime(Time m )
 {
 	MT = m;
 }
-void cargo::setCDT(Time t)
-{
-	CDT = t;
-}
+
 void cargo::calCDT()
 {
-	if (associated) 
-	{
+	if (associated) {
 		int x = ceil(deliveryDistance / associated->getSpeed());
 		CDT = associated->getMovingTime() + x + loadingTime;
 	}
+}
+void cargo::calWaitingTime()
+{
+	WT = MT - PT;
 }
 bool cargo::AutoPromoted()
 {

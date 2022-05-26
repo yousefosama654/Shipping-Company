@@ -1,14 +1,14 @@
+#pragma once
 #include"truck.h"
 truck::truck()// default constructor
 {
-	TC = 0;
+	Capacity = 0;
 	Maintance = 0;
 	Speed = 0;
 	JourneysLeft = 0;
 	//JourneysBeforeCheckup=0;
 	TruckType = 'U';
 	DeliveryInterval = 0;
-	avaliable = 0;
 	ID = 0;
 	noOfCargos = 0;
 }
@@ -19,14 +19,15 @@ truck::truck(int id, int Mt, float s, char tp, int tc) // non-default constructo
 	Maintance = Mt;
 	Speed = s;
 	JourneysLeft = 0;
-	TC = tc;
+	Capacity = tc;
 	//JourneysBeforeCheckup = x;
 	TruckType = tp;
 	maxDelivaryDistance = INT_MIN;
-	sumOfLoadingTimes = 0;
+	sumOfLoadingTimes = 0; // time  
 	sumOfMovingTimes = 0;
 	sumOfLoading = 0;
 	CargosDelivered = 0;
+	distanceBeforeUnRegulerChechUp = 0;
 }
 
 //setters
@@ -36,7 +37,7 @@ void truck::setID(int id)
 }
 void  truck::setCapacity(int c)
 {
-	this->TC = c;
+	this->Capacity = c;
 }
 void  truck::setSpeed(float s)
 {
@@ -46,10 +47,7 @@ void truck::setTruckType(char tt)
 {
 	TruckType = tt;
 }
-void truck::setAvailablity(bool a)
-{
-	avaliable = a;
-}
+
 
 void truck::setJourneysLeft(int JL)
 {
@@ -61,8 +59,9 @@ void truck::setMaintance(int M)
 }
 void truck::setDeliveryInterval()
 {
-	DeliveryInterval = MT + (maxDelivaryDistance / Speed) * 2 + sumOfLoadingTimes;
-	sumOfMovingTimes += (maxDelivaryDistance / Speed) + sumOfLoadingTimes;
+	DeliveryInterval = MT + ceil(maxDelivaryDistance / Speed) * 2 + sumOfLoadingTimes;
+	sumOfMovingTimes += ceil(maxDelivaryDistance / Speed) + sumOfLoadingTimes;
+	distanceBeforeUnRegulerChechUp += maxDelivaryDistance * 2;
 }
 void truck::setMovingTime(Time x)
 {
@@ -72,13 +71,40 @@ void truck::setFinishedChecking(Time fc)
 {
 	finishedChecking = fc;
 }
-void truck::setSumOfLoading(int i)
+void truck::incrementSumOfLoading(int i)
 {
 	sumOfLoading += i;
 }
+
 void truck::incrementNoOfCargos()
 {
 	noOfCargos++;
+}
+void truck::setSumOfLoadingTimes(int x)
+{
+	sumOfLoadingTimes = x;
+}
+void truck::setMovingWaitingTimeCargos(const Time& mt)
+{
+	Queue<cargo*> q;
+	cargo* c = nullptr;
+	while (!cargos.isEmpty())
+	{
+		cargos.dequeue(c);
+		c->setMovingTime(mt);
+		c->calWaitingTime();
+		q.enqueue(c);
+	}
+	while (!q.isEmpty())
+	{
+		q.dequeue(c);
+		cargos.enqueue(c, -c->getDeliverlyTime().toInt());
+	}
+
+}
+void truck::setNight(bool n)
+{
+	Night = n;
 }
 //getters
 int truck::getID()
@@ -87,7 +113,7 @@ int truck::getID()
 }
 int truck::getCapcity() const
 {
-	return TC;
+	return Capacity;
 }
 float truck::getSpeed() const
 {
@@ -97,10 +123,7 @@ char truck::getTruckType() const
 {
 	return this->TruckType;
 }
-bool truck::getAvailablity()
-{
-	return this->avaliable;
-}
+
 
 int truck::getJourneysLeft()
 {
@@ -143,30 +166,17 @@ int truck::getNoOfCargos()
 
 cargo* truck::DropCargo(Time t, int& movingCargos)
 {
-	cargo* c = nullptr;	cargo* f = nullptr;
+	cargo* c = nullptr;
+	cargo* f = nullptr;
 	Queue<cargo*> q;
-	cargos.peek(c);
-	while (!cargos.isEmpty())
+	if (cargos.peek(c) && c->getDeliverlyTime() == t)
 	{
-		if (c->getDeliverlyTime() == t)
-		{
-			f = c;
-			noOfCargos--;
-			movingCargos--;
-			CargosDelivered++;
-		}
-		else
-		{
-			q.enqueue(c);
-		}
-
 		cargos.dequeue(c);
-		cargos.peek(c);
-	}
-	while (!q.isEmpty())
-	{
-		q.dequeue(c);
-		cargos.enqueue(c, c->getdeliverydistance());
+		f = c;
+
+		noOfCargos--;
+		movingCargos--;
+		CargosDelivered++;
 	}
 	return f;
 }
@@ -179,10 +189,8 @@ void truck::assignCargo(cargo* c) {
 	incrementNoOfCargos();
 	if (c->getdeliverydistance() > maxDelivaryDistance)
 		maxDelivaryDistance = c->getdeliverydistance();
-	c->setCDT(c->getCargoDeliveryTime());
 	sumOfLoadingTimes += c->getLoadingTime();
-
-	cargos.enqueue(c, c->getdeliverydistance());
+	cargos.enqueue(c, -c->getDeliverlyTime().toInt());
 }
 
 void truck::incrementJournies()
@@ -193,6 +201,8 @@ void truck::incrementJournies()
 
 void truck::print()
 {
+	if (this->cargos.isEmpty())
+		return;
 	cargo* c = nullptr;
 	cargo* x = nullptr;
 	Queue<cargo*> q;
@@ -210,7 +220,7 @@ void truck::print()
 	{
 		string comma = cargos.peek(x) ? "," : "";
 		string x = to_string(c->getId()) + comma;
-		cout << c->getId() << ',';
+		cout << x;
 		q.enqueue(c);
 	}
 	if (nc)
@@ -221,13 +231,21 @@ void truck::print()
 		cout << '}';
 	while (q.dequeue(c))
 	{
-		cargos.enqueue(c, c->getdeliverydistance());
+		cargos.enqueue(c, -c->getDeliverlyTime().toInt());
 	}
 }
 
 void truck::decrementJourniesleft()
 {
 	JourneysLeft--;
+}
+void truck::resetdistanceBeforeUnRegulerChechUp()
+{
+	distanceBeforeUnRegulerChechUp = 0;
+}
+void truck::resetMaxDelivaryDistance()
+{
+	maxDelivaryDistance = 0;
 }
 int  truck::getToTCargosDelivered()
 {
@@ -247,4 +265,31 @@ int truck::getSumOfLoading()
 int truck::getActiveTime()
 {
 	return getSumOfLoading() + getSumofMovingTimes();
+}
+
+int truck::getDistanceBeforeUnRegulerChechUp()
+{
+	return distanceBeforeUnRegulerChechUp;
+}
+
+int truck::getNight()
+{
+	return Night;
+}
+
+int truck::getPriority()
+{
+	return ceil(100 * Speed / Capacity);
+}
+
+cargo* truck::deliveryFailure()
+{
+
+	cargo* x = nullptr;
+	cargos.dequeue(x);
+	if (x)
+	{
+		noOfCargos--;
+	}
+	return x;
 }

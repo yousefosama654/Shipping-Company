@@ -31,23 +31,25 @@ void UI::printCurrentTime(Time t)
 }
 
 void UI::printInteractiveMode(Time t, Queue<NormalCargo*>NWC, Queue<SpecialCargo*>SWC, PriQ<vipCargo*>VWC,
-							  PriQ<truck*> LT, Queue<truck*> ENT, Queue<truck*> EST,Queue<truck*> EVT ,PriQ<truck*> CT,
-							  PriQ<truck*> MT,int movingCargo, int Wn, Queue<cargo*> Dq, int Dn)
+	PriQ<truck*> LT, PriQ<truck*> ENT, PriQ<truck*> EST, PriQ<truck*> EVT,
+	PriQ<truck*> NNT, PriQ<truck*> NST, PriQ<truck*> NVT,
+	PriQ<truck*> CT, PriQ<truck*> MT, int movingCargo, int Wn, Queue<cargo*> Dq,
+	Queue<truck*> qn_UnReg, Queue<truck*> qs_UnReg, Queue<truck*> qv_UnReg, int Dn)
 {
 	printCurrentTime(t);
-	cout << endl <<"-------------------------------------------------------------------"<<endl; 
+	cout << endl << "-------------------------------------------------------------------" << endl;
 	printWaitingCargos(NWC, SWC, VWC, Wn);
-	cout << endl <<"-------------------------------------------------------------------"<<endl;
+	cout << endl << "-------------------------------------------------------------------" << endl;
 	printLoadingTrucks(LT);
-	cout << endl <<"-------------------------------------------------------------------"<<endl;
-	printEmptyTrucks(ENT,EST,EVT); 
-	cout << endl <<"-------------------------------------------------------------------"<<endl;
-	printInCheckUpTrucks(CT); 
-	cout << endl <<"-------------------------------------------------------------------"<<endl;
-	printMovingCargos(MT,movingCargo); 
-	cout << endl <<"-------------------------------------------------------------------"<<endl;
+	cout << endl << "-------------------------------------------------------------------" << endl;
+	printEmptyTrucks(ENT, EST, EVT, NNT, NST, NVT);
+	cout << endl << "-------------------------------------------------------------------" << endl;
+	printInCheckUpTrucks(CT, qn_UnReg, qs_UnReg, qv_UnReg);
+	cout << endl << "-------------------------------------------------------------------" << endl;
+	printMovingCargos(MT, movingCargo);
+	cout << endl << "-------------------------------------------------------------------" << endl;
 	printDeliveredCargos(Dq, Dn);
-	cout << endl <<"-------------------------------------------------------------------"<<endl;
+	cout << endl << "-------------------------------------------------------------------" << endl;
 
 }
 
@@ -61,34 +63,35 @@ void UI::printEnd()
 	cout << "\n~~~~~~~~~~~~~~~~~||THE END||~~~~~~~~~~~~~~~~~~~~\n";
 }
 
+
 void UI::printWaitingCargos(Queue<NormalCargo*> NWC, Queue<SpecialCargo*>SWC, PriQ<vipCargo*>VWC, int n)
 {
 	cout << n << " Waiting Cargos: ";
 	if (!NWC.isEmpty())
 	{
 		NormalCargo* n;
-		cout << "["; 
+		cout << "[";
 		while (!NWC.isEmpty())
 		{
-			NWC.dequeue(n); 
-			cout << n->getId(); 
+			NWC.dequeue(n);
+			cout << n->getId();
 			if (NWC.peek(n))
-				cout << ','; 
+				cout << ',';
 		}
-		cout << "] "; 
+		cout << "] ";
 	}
 	if (!SWC.isEmpty())
 	{
 		SpecialCargo* s;
-		cout << "("; 
+		cout << "(";
 		while (!SWC.isEmpty())
 		{
-			SWC.dequeue(s); 
-			cout << s->getId(); 
+			SWC.dequeue(s);
+			cout << s->getId();
 			if (SWC.peek(s))
-				cout << ','; 
+				cout << ',';
 		}
-		cout << ") "; 
+		cout << ") ";
 	}
 	if (!VWC.isEmpty())
 	{
@@ -107,64 +110,83 @@ void UI::printWaitingCargos(Queue<NormalCargo*> NWC, Queue<SpecialCargo*>SWC, Pr
 
 void UI::printLoadingTrucks(PriQ<truck*> q)
 {
-	cout << q.getCount() << " Loading Trucks : "; 
-	truck* t = nullptr; 
-	while (q.dequeue(t))
-	{
-		cout << t->getID();
-		t->print(); 
-		cout << " "; 
-	}
-}
-
-void UI::printEmptyTrucks(Queue<truck*> NT, Queue<truck*> ST, Queue<truck*> VT)
-{
-	cout << NT.getCount() + ST.getCount() + VT.getCount() << " Empty Trucks: ";
-	truck* t = nullptr; 
-	while (NT.dequeue(t))
-	{
-		cout << '[' << t->getID() << "]";
-		if (NT.peek(t))
-			cout << ','; 
-	}
-	if (ST.peek(t))
-		cout << ','; 
-	while (ST.dequeue(t))
-	{
-		cout << '(' << t->getID() << ")";
-		if (ST.peek(t))
-			cout << ',';
-	}
-	if (VT.peek(t))
-		cout << ',';
-	while (VT.dequeue(t))
-	{
-		cout << '{' << t->getID() << "}";
-		if (VT.peek(t))
-			cout << ',';
-	}
-}
-
-void UI::printMovingCargos(PriQ<truck*> q,int movingCargos)
-{
-	cout << movingCargos << " Moving Cargos : ";
-	truck* t; 
+	cout << q.getCount() << " Loading Trucks : ";
+	truck* t = nullptr;
 	while (q.dequeue(t))
 	{
 		cout << t->getID();
 		t->print();
+		cout << " ";
 	}
 }
 
-void UI::printInCheckUpTrucks(PriQ<truck*> q)
+void UI::printEmptyTrucks(PriQ<truck*> NT, PriQ<truck*> ST, PriQ<truck*> VT, PriQ<truck*> NNT, PriQ<truck*> NST, PriQ<truck*> NVT)
 {
-	cout << q.getCount() << " In-Checkup Trucks: ";
-	truck* t; 
+	cout << NT.getCount() + ST.getCount() + VT.getCount() + NNT.getCount() + NST.getCount() + NVT.getCount() << " Empty Trucks: ";
+	truck* t = nullptr;
+	while (NT.dequeue(t))
+	{
+		cout << '[' << t->getID() << "]";
+		if (NT.peek(t) || NNT.peek(t) || NST.peek(t) || NVT.peek(t) || ST.peek(t) || VT.peek(t))
+			cout << ",";
+	}
+	while (NNT.dequeue(t))
+	{
+		cout << '[' << t->getID() << "]";
+		if (NNT.peek(t) || NST.peek(t) || NVT.peek(t) || ST.peek(t) || VT.peek(t))
+			cout << ",";
+	}
+	while (ST.dequeue(t))
+	{
+		cout << '(' << t->getID() << ")";
+		if (NST.peek(t) || NVT.peek(t) || ST.peek(t) || VT.peek(t))
+			cout << ',';
+	}
+	while (NST.dequeue(t))
+	{
+		cout << '(' << t->getID() << ")";
+		if (NST.peek(t) || NVT.peek(t) || VT.peek(t))
+			cout << ',';
+	}
+	while (VT.dequeue(t))
+	{
+		cout << '{' << t->getID() << "}";
+		if (VT.peek(t) || NVT.peek(t))
+			cout << ',';
+	}
+	while (VT.dequeue(t))
+	{
+		cout << '{' << t->getID() << "}";
+		if (NVT.peek(t))
+			cout << ',';
+	}
+}
+
+void UI::printMovingCargos(PriQ<truck*> q, int movingCargos)
+{
+	cout << movingCargos << " Moving Cargos : ";
+	truck* t;
+	while (q.dequeue(t))
+	{
+		if (t->getNoOfCargos() != 0)
+		{
+			cout << t->getID();
+			t->print();
+			string space = q.peek(t) ? " " : "";
+			cout << space;
+		}
+	}
+}
+
+void UI::printInCheckUpTrucks(PriQ<truck*> q, Queue<truck*> qn, Queue<truck*> qs, Queue<truck*> qv)
+{
+	cout << q.getCount() + qn.getCount() + qs.getCount() + qv.getCount() << " In-Checkup Trucks: ";
+	truck* t;
 	while (q.dequeue(t))
 	{
 		if (t->getTruckType() == 'n')
 		{
-			cout << '[' << t->getID() << ']'; 
+			cout << '[' << t->getID() << ']';
 		}
 		else if (t->getTruckType() == 's')
 		{
@@ -174,17 +196,36 @@ void UI::printInCheckUpTrucks(PriQ<truck*> q)
 		{
 			cout << '{' << t->getID() << '}';
 		}
-		cout << " "; 
+		cout << " ";
 	}
+
+	while (qn.dequeue(t))
+	{
+		cout << '[' << t->getID() << ']' << "Un_Reg";
+		cout << " ";
+	}
+
+	while (qs.dequeue(t))
+	{
+		cout << '(' << t->getID() << ')' << "Un_Reg";
+		cout << " ";
+	}
+
+	while (qv.dequeue(t))
+	{
+		cout << '{' << t->getID() << '}' << "Un_Reg";
+		cout << " ";
+	}
+
 }
 
 void UI::printDeliveredCargos(Queue<cargo*> q, int n)
 {
-	cout << endl << n << " Delivered Cargos : " ;
+	cout << endl << n << " Delivered Cargos : ";
 	cargo* x = nullptr;
 	while (!q.isEmpty())
 	{
-		q.dequeue(x); 
+		q.dequeue(x);
 		NormalCargo* nc = dynamic_cast<NormalCargo*> (x);
 		SpecialCargo* sc = dynamic_cast<SpecialCargo*> (x);
 		vipCargo* vc = dynamic_cast<vipCargo*> (x);
@@ -198,8 +239,19 @@ void UI::printDeliveredCargos(Queue<cargo*> q, int n)
 	cout << endl;
 }
 
-void UI::printStepbyStep(Time t, Queue<NormalCargo*> NWC, Queue<SpecialCargo*> SWC, PriQ<vipCargo*> VWC,int Wn, Queue<cargo*> Dq, int Dn)
+void UI::promptUser()
 {
+	cout << endl << "Press Enter to Increment 1 hour \n";
+	//cin.ignore(INT_MAX, '\n');
+}
+
+void UI::printStepbyStep(Time t, Queue<NormalCargo*>NWC, Queue<SpecialCargo*>SWC, PriQ<vipCargo*>VWC,
+	PriQ<truck*> LT, PriQ<truck*> ENT, PriQ<truck*> EST, PriQ<truck*> EVT,
+	PriQ<truck*> NNT, PriQ<truck*> NST, PriQ<truck*> NVT,
+	PriQ<truck*> CT, PriQ<truck*> MT, int movingCargo, int Wn, Queue<cargo*> Dq,
+	Queue<truck*> qn_UnReg, Queue<truck*> qs_UnReg, Queue<truck*> qv_UnReg, int Dn)
+{
+	printInteractiveMode(t, NWC, SWC, VWC, LT, ENT, EST, EVT, NNT, NST, NVT, CT, MT, movingCargo, Wn, Dq, qn_UnReg, qs_UnReg, qv_UnReg, Dn);
 	Sleep(1000);
 }
 void UI::Welecome()

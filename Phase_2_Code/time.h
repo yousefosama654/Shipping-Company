@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <math.h>
 class Time
 {
 	int day;
@@ -18,7 +19,7 @@ public:
 	bool operator == (const Time& t1); 
 	void IncrementHour();
 	void IncrementDay();
-	int toInt();
-	Time toTime(int);
+	int toInt(); 
+	Time toTime(float);
 	// ADD overlaoding to an integer
 };
