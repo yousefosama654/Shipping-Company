@@ -242,7 +242,7 @@ void UI::printDeliveredCargos(Queue<cargo*> q, int n)
 void UI::promptUser()
 {
 	cout << endl << "Press Enter to Increment 1 hour \n";
-	//cin.ignore(INT_MAX, '\n');
+	cin.ignore(INT_MAX, '\n');
 }
 
 void UI::printStepbyStep(Time t, Queue<NormalCargo*>NWC, Queue<SpecialCargo*>SWC, PriQ<vipCargo*>VWC,
